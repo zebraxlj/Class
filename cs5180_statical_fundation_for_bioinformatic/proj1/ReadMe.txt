@@ -35,7 +35,7 @@
 
 ./counting.c
 ./counting_prime.c ------ counting program provided by Dr. Drews
-------------------------- both are modified to not count numerical characters
+------------------------- both are modified to ignore numerical characters
 
 
 ./part1.py
