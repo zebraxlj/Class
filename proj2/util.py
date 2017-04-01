@@ -1,18 +1,26 @@
 import csv
 import re
 
-def load_probability_table(file_path):
-	P = dict()
-	total_char_count = 0
+def load_occurrence_file(file_path, num_word=True, num_file=False):
+	occurrence = dict()
 	with open(file_path, 'r') as file:
 		_ = file.readline()
 		for line in file:
-			tokens = re.split('[\t| ]+', line)
-			P[tokens[0]] = float(tokens[1])
+			tokens = re.split('[\t|\n| ]+', line)
+			if num_word:
+				occurrence[tokens[0]] = float(tokens[1])
+			elif num_file:
+				occurrence[tokens[0]] = float(tokens[2])
+	return occurrence
+
+def get_total_char_count(char_occurrence_file):
+        total_char_count = 0
+	with open(char_occurrence_file, 'r') as file:
+		_ = file.readline()
+		for line in file:
+			tokens = re.split('[\t|\n| ]+', line)
 			total_char_count += float(tokens[1])
-		for key in P.keys():
-			P[key] /= total_char_count
-	return total_char_count, P
+	return total_char_count
 
 def test_probability_table(table):
 	for k, v in table.items():

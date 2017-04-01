@@ -1,6 +1,7 @@
 import csv
 import re
 from util import *
+from Markov import Markov
 
 P = dict()
 trans_matrix = []
@@ -22,13 +23,13 @@ def get_expected(word):
 
 def save_part1():
 	header = ['word', 'O/E', 'obs', 'E']
-	with open('output/part1_letter_probability.csv', 'wb') as f:
-		writer = csv.writer(f)
-		writer.writerow(['letter', 'P'])
-		keys = P.keys()
-		keys = sorted(keys)
-		for key in keys:
-			writer.writerow([key, P[key]])
+	# with open('output/part1_letter_probability.csv', 'wb') as f:
+	# 	writer = csv.writer(f)
+	# 	writer.writerow(['letter', 'P'])
+	# 	keys = P.keys()
+	# 	keys = sorted(keys)
+	# 	for key in keys:
+	# 		writer.writerow([key, P[key]])
 	with open('output/part1_result_full.csv', 'wb') as f:
 		writer = csv.writer(f)
 		writer.writerows(word_tuples)
@@ -67,27 +68,50 @@ def save_part1():
 			writer.writerow([])
 
 if __name__ == '__main__':
-	file_name = 'complete_book_of_cheese_nows'
-	total_char_count, P = load_probability_table('letter_occurrence/'+file_name)
-	test_probability_table(P)
-
+	file_name = 'all'
+	occurrence = load_occurrence_file('word_occurrence/'+file_name)
+	total_char_count = get_total_char_count('letter_occurrence/'+file_name)
+	print total_char_count
+	order = 1
+	word_len_min = 3
+	word_len_max = 10
+	M1 = Markov(occurrence, total_char_count, order, word_len_min, word_len_max)
 	with open('word_occurrence/'+file_name, 'r') as file:
 		_ = file.readline()
 		for line in file:
 			tokens = re.split('[\t| ]+', line)
-			E = get_expected(tokens[0])
+			if len(tokens[0]) < word_len_min: continue
+			if len(tokens[0]) > word_len_max: continue
+			E = M1.get_expected_value(tokens[0])
 			word_tuples.append((tokens[0], float(tokens[1])/E, int(tokens[1]), E))
 
-	for i in xrange(11):
-		word_tuples_by_length.append([])
-	for elem in word_tuples:
-		word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
+        for i in xrange(11):
+                word_tuples_by_length.append([])
+        for elem in word_tuples:
+                word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
+        for i in xrange(len(word_tuples_by_length)):
+                word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
+                                                  key = lambda word : word[1], reverse = True)
+        word_tuples = sorted(word_tuples, key = lambda word:word[1], reverse = True)
+        save_part1()
+                
+	# with open('word_occurrence/'+file_name, 'r') as file:
+	#	_ = file.readline()
+	#	for line in file:
+	#		tokens = re.split('[\t| ]+', line)
+	#		E = get_expected(tokens[0])
+	#		word_tuples.append((tokens[0], float(tokens[1])/E, int(tokens[1]), E))
+
+	# for i in xrange(11):
+	#	word_tuples_by_length.append([])
+	# for elem in word_tuples:
+	#	word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
 
 
-	for i in xrange(len(word_tuples_by_length)):
-		word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
-			key = lambda word : word[1], reverse = True)
+	# for i in xrange(len(word_tuples_by_length)):
+	#	word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
+	#		key = lambda word : word[1], reverse = True)
 
-	word_tuples = sorted(word_tuples, key = lambda word : word[1], reverse = True)
+	# word_tuples = sorted(word_tuples, key = lambda word : word[1], reverse = True)
 
-	save_part1()
+	# save_part1()
