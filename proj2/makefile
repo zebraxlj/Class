@@ -1,7 +1,7 @@
-#!/bin/bash
 len_min = 1
 len_max = 10
 all: a.out word_occurrence letter_occurrence
+	if [ ! -d "./output" ]; then mkdir output; fi
 
 word_occurrence:
 	if [ ! -d "./word_occurrence" ]; then mkdir word_occurrence; fi
@@ -36,3 +36,4 @@ clean:
 	rm -f ./a.out
 	rm -rf word_occurrence
 	rm -rf letter_occurrence
+	rmdir output
