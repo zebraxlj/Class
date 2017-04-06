@@ -17,18 +17,18 @@ class Markov:
 		self.set_word_length_range(wl_min, wl_max)
 		
 	# def __init__(self, occurrence):
-	# 	self.occurrence = None
-	# 	self.order = None
-	# 	self.wl_min = None
-	# 	self.wl_max = None
+	#	self.occurrence = None
+	#	self.order = None
+	#	self.wl_min = None
+	#	self.wl_max = None
 		
-	# 	if type(occurrence) is dict:
-	# 		self.occurrence = occurrence
-	# 	else:
-	# 		print 'input must be dictionary type, given', type(occurrence)
+	#	if type(occurrence) is dict:
+	#		self.occurrence = occurrence
+	#	else:
+	#		print 'input must be dictionary type, given', type(occurrence)
 		
-	# 	self.max_order = 0
-	# 	self.compute_max_order()
+	#	self.max_order = 0
+	#	self.compute_max_order()
 		
 	def compute_max_order(self):
 		for key in self.occurrence.keys():
@@ -39,30 +39,37 @@ class Markov:
 		if order < 0:
 			print 'markov order < 0'
 		if order > self.max_order:
-			print 'markov order too large'
+			print 'markov order too large, max_order:', self.max_order 
 		self.order = order
 
 	def set_word_length_range(self, l, r):
 		if l > r:
-			print 'min length:',l,' > max length:', r
+			print 'min length:',l,'> max length:', r
 			return
 		if l <= self.order:
-			print 'min length:',l,' <= markov order:', self.order
+			print 'min length:',l,'<= markov order:', self.order
 			return
 		self.wl_min = l
 		self.wl_max = r
 
 	def get_expected_value(self, word):
-		ret = float(self.occurrence[word[:self.order]]) / self.seq_len
+		# print word
+		# print word[:self.order]
+		ret = float(self.occurrence[word[:self.order]]) / (self.seq_len-self.order)
 		for l in range(len(word)-self.order):
 			r = l + self.order+1
-			ret *= float(self.occurrence[word[l:r+1]]) / self.occurrence[word[l:r]]
+			ret *= float(self.occurrence[word[l:r]]) / self.occurrence[word[l:r-1]]
+			# print word[l:r]
 		return (self.seq_len - len(word)) * ret
-        
-        def get_OE_score(self, word):
-                O = self.occurrence[word]
-                E = get_expected_value(word)
-                return float(O)/E
-        
+	
+	def get_OE_score(self, word):
+		O = self.occurrence[word]
+		E = get_expected_value(word)
+		return float(O)/E
+	
 	def get_variance(self, word):
 		pass
+
+	def print_probability_table(self):
+		for key in self.occurrence.keys():
+			print key, '\t\t', self.occurrence[key]
