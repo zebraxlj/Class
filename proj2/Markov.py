@@ -38,10 +38,10 @@ class Markov:
                 assert (len(word)>self.order),'word length: '+str(len(word))+' < order: '+str(self.order)
 		ret = float(self.occurrence[word[:self.order]]) / (self.seq_len-self.order)
 		for l in range(len(word)-self.order):
-			r = l + self.order+1
+			r = l + self.order + 1
 			ret *= float(self.occurrence[word[l:r]]) / self.occurrence[word[l:r-1]]
 			# print word[l:r]
-		return (self.seq_len - len(word)) * ret
+		return (self.seq_len - len(word) + 1) * ret
 	
 	def get_OE_score(self, word):
                 assert (len(word)>self.order),'word length: '+str(len(word))+' < order: '+str(self.order)
