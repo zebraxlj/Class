@@ -36,4 +36,4 @@ clean:
 	rm -f ./a.out
 	rm -rf word_occurrence
 	rm -rf letter_occurrence
-	rmdir output
+	rm -rf output
