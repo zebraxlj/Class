@@ -99,9 +99,9 @@ if __name__ == '__main__':
 				continue
 			O = occurrence[word]
 			E = markov_model.get_expected_value(word)
-			word_tuples.append((word, float(math.pow(O,2))/(math.sqrt(float(E)/2+2)-1), int(O), E))
-#			 word_tuples.append((word, float(O)/E, int(O), E))
-
+#			word_tuples.append((word, float(math.pow(O,2))/(math.sqrt(float(E)/2+2)-1), int(O), E))
+#		        word_tuples.append((word, float(O)/E, int(O), E))
+		        word_tuples.append((word, float(O)/(math.log(float(E)+1)+1), int(O), E))
 
 		
 		for i in xrange(word_len_max+1):
