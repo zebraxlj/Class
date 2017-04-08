@@ -1,154 +1,167 @@
 Part 1:
-Major observation:
--   All out standing scores are from Non English words
--   We are still experiencing the problem we had for binomial model that expected value vanishes when word length get longer.
+    Major observation:
+    -   All out standing scores are from Non English words
+    -   We are still experiencing the problem we had for binomial model that expected value vanishes when word length get longer.
+        
+        Illustration: the best O/E score for each word length
+            all_file_OE/part1_M2_result_top_bott_50OE_by_length
     
-    Illustration: the best O/E score for each word length in all_file_OE/part1_M2_result_top_bott_50OE_by_length
-        PPPT    ,   1186.666667,   1 ,     0.000842697
-        HDNWS   ,   188652.5   ,   1 ,     5.30E-06
-        DPPPTH  ,   8243762.243,   1 ,     1.21E-07
-        VMCCNCS ,   205576983.5,   1 ,     4.86E-09
-        JPEGSPBM,   4079750907 ,   1 ,     2.45E-10
-
-    Illustration: performance of O/E score on English words from all_file_OE/part1_M3_result_full.csv
-
-        THASECON,   10.2224138 ,   1  ,    0.097824254
-        SHEEP   ,   10.2224026 ,   290,    28.36906463
-        ERYJACKT,   10.22239504,   2  ,    0.195648866
-                ,              ,      ,
-        WTHEPLAY,   5.539637787,   1  ,    0.180517218
-        WATER   ,   5.539609053,   242,    43.68539326
-        OCALLEDA,   5.539595007,   7  ,    1.263630282
-                ,              ,      ,
-        NGCOPYRI,   5.138236075,   1  ,    0.194619318
-        BEFORE  ,   5.138217667,   238,    46.3195636
-        NSAGETH ,   5.138171495,   2  ,    0.389243528
-                ,              ,      ,
-        RHARDW  ,   5.385203071,   3  ,    0.557082056
-        MESSAGE ,   5.385148455,   415,    77.06379935
-        ARTSAREB,   5.385143807,   1  ,    0.185696062
-                ,              ,      ,
-        YMAGA   ,   18.6       ,   2  ,    0.107526882
-        AMERICAN,   18.5999718 ,   273,    14.67744161
-        ITTURNE ,   18.59997148,   5  ,    0.268817617
-                ,              ,      ,
-        UDINGSHE,   16.13559203,   1  ,    0.061974794
-        SANDWICH,   16.13549063,   118,    7.313071707
-        ISSALITT,   16.13543688,   2  ,    0.123950781
-
-
-Explanation:
-    Though this Obs and Exp heavily rely on the input sequences.
-    The worst case can be the Obs's decreasing rate is linear to word length, while the Exp's decreasing rate is exponential to word length.
-    Hence, the O/E decreases exponentially as the word length increases.
-
-Other Observation:
--   For books Kth degree markov model, words with length K+1 will not get any meanful O/E score
-    I don't have a good explanation yet.
+            PPPT    ,   1186.666667,       1  ,   0.000842697
+            HDNWS   ,   188652.5   ,       1  ,   5.30E-06
+            DPPPTH  ,   8243762.243,       1  ,   1.21E-07
+            VMCCNCS ,   205576983.5,       1  ,   4.86E-09
+            JPEGSPBM,   4079750907 ,       1  ,   2.45E-10
     
--   For some reason when word length gets longer there seems to be many combination of English words get high score. However, these words cannot get out standing score by themselves.
-    However, this might be just an illusion that we thought these are combination of English words.
-
-    Illustration: from all_file_OE/part1_M2_result_top_bott_50OE_by_length.csv
-        HATED   ,   0.008266456,   2 ,    241.9416577
-        ANDTHAN ,   0.027714329,   1 ,    36.08241746
-        THEYAND ,   0.027338726,   1 ,    36.57814955
-        THECOME ,   0.016172305,   1 ,    61.83410547
-        SIGHTHE ,   0.014249622,   1 ,    70.17730027
-        THESANDS,   0.080838516,   1 ,    12.37034088
-        ANDSOFTH,   0.073985239,   3 ,    40.54862879
-        LIKEDTHE,   0.063668029,   1 ,    15.70647015
-        CANDTHER,   0.063204294,   1 ,    15.82170972
-        THEYOUGH,   0.039792917,   1 ,    25.13010037
-        THENTHEE,   0.028174643,   1 ,    35.49290763
+        Illustration: comparing performance of O/E score on English words and non-English words
+            all_file_OE/part1_M3_result_full.csv
     
-    Illustration: from all_file_OE/part1_M3_result_top_bott_50OE_by_length.csv
-        ROMATO   ,  0.012555949 ,  1 ,    79.64352145
-        SALTHE   ,  0.008235503 ,  1 ,    121.4254979
-        FROMAK   ,  0.007785753 ,  1 ,    128.4397291
-        THECALL  ,  0.025891469 ,  1 ,    38.62276078
-        THEFIND  ,  0.023029669 ,  1 ,    43.42224769
-        INGLAND  ,  0.018630081 ,  2 ,    107.3532643
-        SGROUNDE ,  0.04528233  ,  1 ,    22.08366952
-        THOUGHTL ,  0.043820161 ,  1 ,    22.82054585
-        PROJECTO ,  0.04315622  ,  1 ,    23.17163091
-        WITHATTE ,  0.042905677 ,  2 ,    46.61387769
-        THEMEMBE ,  0.04056829  ,  1 ,    24.64979427
-        THEMOVER ,  0.023801941 ,  1 ,    42.01338003
-        NUMBERTH ,  0.029317944 ,  1 ,    34.10880357
+            THASECON,   10.2224138 ,       1  ,   0.097824254
+            SHEEP   ,   10.2224026 ,       290,   28.36906463
+            ERYJACKT,   10.22239504,       2  ,   0.195648866
 
-O/E score = Obs / [log(Exp + 1) + 1]
-Idea: trying to counter the problem 
-    The worst case can be the Obs's decreasing rate is linear to word length, while the Exp's decreasing rate is exponential to word length.
-    The O/E decreases exponentially as the word length increases.
+            WTHEPLAY,   5.539637787,       1  ,   0.180517218
+            WATER   ,   5.539609053,       242,   43.68539326
+            OCALLEDA,   5.539595007,       7  ,   1.263630282
 
-Observation:
+            NGCOPYRI,   5.138236075,       1  ,   0.194619318
+            BEFORE  ,   5.138217667,       238,   46.3195636
+            NSAGETH ,   5.138171495,       2  ,   0.389243528
 
-    HEESE    ,  338.8508695 ,    3149 ,   3995.497908
-    FRANCE   ,  105.3075289 ,    690  ,   256.8139168
-    ECHEESE  ,  79.41719968 ,    603  ,   728.8314944
-    SIMILART ,  78.0043367  ,    189  ,   3.149310644
+            RHARDW  ,   5.385203071,       3  ,   0.557082056
+            MESSAGE ,   5.385148455,       415,   77.06379935
+            ARTSAREB,   5.385143807,       1  ,   0.185696062
 
-Illustration: top 50 English words from all_file_OlogE/part1_M3_result_top_bott_50OE_by_length.csv
-    OTHER    ,  157.9835744 ,    1135 ,   484.0690139
-    THERE    ,  132.8524204 ,    1117 ,   1647.837443
-    WHICH    ,  130.7205293 ,    1035 ,   1008.948483
-    CREAM    ,  101.5689836 ,    645  ,   209.6849383
-    THING    ,  92.45995597 ,    714  ,   829.6943785
-    SPOON    ,  80.7675     ,    613  ,   726.5527066
-    TABLE    ,  79.08201459 ,    602  ,   743.2301524
-    ROUND    ,  77.97581039 ,    555  ,   452.7706735
-    THESE    ,  76.57221955 ,    563  ,   572.9463869
-    FORTH    ,  73.42663823 ,    518  ,   425.0941966
-    THEIR    ,  72.0729297  ,    539  ,   650.0171644
-    WHERE    ,  72.03753849 ,    464  ,   229.6926415
-    FRANCE   ,  105.3075289 ,    690  ,   256.8139168
-    BUTTER   ,  90.72399953 ,    660  ,   530.0263024
-    SYSTEM   ,  75.38554451 ,    424  ,   100.9436769
-    LITTLE   ,  70.60684287 ,    491  ,   384.2915067
-    CALLED   ,  61.78832033 ,    315  ,   59.22279085
-    TABLES   ,  57.6841784  ,    383  ,   280.3507854
-    SEASON   ,  57.17549308 ,    328  ,   113.0598821
-    THOUGH   ,  57.02337411 ,    378  ,   277.344801
-    RABBIT   ,  53.99983679 ,    396  ,   562.042716
-    FRENCH   ,  53.16242234 ,    266  ,   53.79145392
-    EITHER   ,  52.10906556 ,    124  ,   2.97340864
-    PEPPER   ,  50.89069297 ,    324  ,   213.1306884
-    GERMAN   ,  50.59924482 ,    271  ,   76.93001325
-    TOMATO   ,  50.35589795 ,    274  ,   83.88261211
-    OTHERS   ,  49.44493158 ,    259  ,   68.27961037
-    AMERICA  ,  77.86494192 ,    366  ,   39.46537138
-    MESSAGE  ,  77.46112039 ,    415  ,   77.06379935
-    ANOTHER  ,  68.97730125 ,    262  ,   15.41755162
-    CHEDDAR  ,  66.86386169 ,    408  ,   163.3422075
-    SIMILAR  ,  66.56313748 ,    242  ,   12.9523218
-    PRESENT  ,  63.34258938 ,    141  ,   2.407539462
-    GENERAL  ,  51.60362468 ,    148  ,   5.475433715
-    SEVERAL  ,  47.80172375 ,    158  ,   9.027387856
-    THROUGH  ,  47.36941495 ,    267  ,   102.1875699
-    HUNDRED  ,  46.14407559 ,    77   ,   0.951672284
-    AMERICAN ,  72.75687285 ,    273  ,   14.67744161
-    INTEREST ,  66.28956352 ,    120  ,   1.248446889
-    TOGETHER ,  55.57654727 ,    232  ,   22.91301068
-    TEASPOON ,  48.98734099 ,    195  ,   18.70003118
-    ORIGINAL ,  47.02014271 ,    168  ,   12.10425305
-    MOUNTAIN ,  47.055396   ,    94   ,   1.711889159
+            YMAGA   ,   18.6       ,       2  ,   0.107526882
+            AMERICAN,   18.5999718 ,       273,   14.67744161
+            ITTURNE ,   18.59997148,       5  ,   0.268817617
+
+            UDINGSHE,   16.13559203,       1  ,   0.061974794
+            SANDWICH,   16.13549063,       118,   7.313071707
+            ISSALITT,   16.13543688,       2  ,   0.123950781
     
-Illustration: subset of English words captured as top 50 words from all_file_OlogE/part1_M3_result_top_bott_50OE_by_length.csv
-    UNIVERSI ,  52.91332268 ,    71  ,    0.40750281
-    WISCONSI ,  52.49765579 ,    92  ,    1.122212555
-    NGREDIEN ,  50.94387259 ,    54  ,    0.061826022
-    INGREDIE ,  48.19026727 ,    54  ,    0.128126416
-    INTERNET ,  47.39861855 ,    177 ,    14.39874556
-    EDCHEESE ,  47.26382794 ,    337 ,    458.5227489
-    NECESSAR ,  47.24404597 ,    58  ,    0.255668283
-    CALIFORN ,  47.21592223 ,    49  ,    0.038508461
-    ILLUSTRA ,  47.17422177 ,    189 ,    19.2150099
-    GREDIENT ,  47.14492295 ,    54  ,    0.156507114
-    XCELLENT ,  46.9510005  ,    55  ,    0.18700584
+
+    Explanation:
+        Though this Obs and Exp heavily rely on the input sequences.
+        The worst case can be the Obs's decreasing rate is linear to word length, while the Exp's decreasing rate is exponential to word length.
+        Hence, the O/E decreases exponentially as the word length increases.
+
+    Other Observation:
+    -   For books Mth-degree markov model, words with length K+1 will not get any meanful O/E score
+        I don't have a good explanation yet.
+    
+    -   For some reason when word length gets longer there seems to be many combination of English words get high score. However, these words cannot get out standing score by themselves.
+        However, this might be just an illusion that we thought these are combination of English words.
+
+        Illustration: English words / combined English words that get low O/E score
+            all_file_OE/part1_M2_result_top_bott_50OE_by_length.csv
+
+            HATED   ,   0.008266456,       2  ,   241.9416577
+            ANDTHAN ,   0.027714329,       1  ,   36.08241746
+            THEYAND ,   0.027338726,       1  ,   36.57814955
+            THECOME ,   0.016172305,       1  ,   61.83410547
+            SIGHTHE ,   0.014249622,       1  ,   70.17730027
+            THESANDS,   0.080838516,       1  ,   12.37034088
+            ANDSOFTH,   0.073985239,       3  ,   40.54862879
+            LIKEDTHE,   0.063668029,       1  ,   15.70647015
+            CANDTHER,   0.063204294,       1  ,   15.82170972
+            THEYOUGH,   0.039792917,       1  ,   25.13010037
+            THENTHEE,   0.028174643,       1  ,   35.49290763
+    
+        Illustration: English words / combined English words that get low O/E score
+            all_file_OE/part1_M3_result_top_bott_50OE_by_length.csv
+
+            ROMATO   ,  0.012555949 ,      1  ,   79.64352145
+            SALTHE   ,  0.008235503 ,      1  ,   121.4254979
+            FROMAK   ,  0.007785753 ,      1  ,   128.4397291
+            THECALL  ,  0.025891469 ,      1  ,   38.62276078
+            THEFIND  ,  0.023029669 ,      1  ,   43.42224769
+            INGLAND  ,  0.018630081 ,      2  ,   107.3532643
+            SGROUNDE ,  0.04528233  ,      1  ,   22.08366952
+            THOUGHTL ,  0.043820161 ,      1  ,   22.82054585
+            PROJECTO ,  0.04315622  ,      1  ,   23.17163091
+            WITHATTE ,  0.042905677 ,      2  ,   46.61387769
+            THEMEMBE ,  0.04056829  ,      1  ,   24.64979427
+            THEMOVER ,  0.023801941 ,      1  ,   42.01338003
+            NUMBERTH ,  0.029317944 ,      1  ,   34.10880357
+
+    New O/E score:
+        O/E score = Obs / [log(Exp + 1) + 1]
+        Idea: trying to counter the problem 
+        -   The worst case: Obs's decreasing rate is linear to word length, and the Exp's decreasing rate is exponential to word length.
+        -   The O/E decreases exponentially as the word length increases.
+
+        Illustration: best word from each word length
+            all_file_OlogE/part1_M3_result_top_bott_50OE_by_length.csv
+
+            HEESE    ,  338.8508695 ,    3149 ,   3995.497908
+            FRANCE   ,  105.3075289 ,    690  ,   256.8139168
+            ECHEESE  ,  79.41719968 ,    603  ,   728.8314944
+            SIMILART ,  78.0043367  ,    189  ,   3.149310644
+
+        Illustration: English words captured with top O/E score
+            all_file_OlogE/part1_M3_result_top_bott_50OE_by_length.csv
+
+            OTHER    ,  157.9835744 ,    1135 ,   484.0690139
+            THERE    ,  132.8524204 ,    1117 ,   1647.837443
+            WHICH    ,  130.7205293 ,    1035 ,   1008.948483
+            CREAM    ,  101.5689836 ,    645  ,   209.6849383
+            THING    ,  92.45995597 ,    714  ,   829.6943785
+            SPOON    ,  80.7675     ,    613  ,   726.5527066
+            TABLE    ,  79.08201459 ,    602  ,   743.2301524
+            ROUND    ,  77.97581039 ,    555  ,   452.7706735
+            THESE    ,  76.57221955 ,    563  ,   572.9463869
+            FORTH    ,  73.42663823 ,    518  ,   425.0941966
+            THEIR    ,  72.0729297  ,    539  ,   650.0171644
+            WHERE    ,  72.03753849 ,    464  ,   229.6926415
+            FRANCE   ,  105.3075289 ,    690  ,   256.8139168
+            BUTTER   ,  90.72399953 ,    660  ,   530.0263024
+            SYSTEM   ,  75.38554451 ,    424  ,   100.9436769
+            LITTLE   ,  70.60684287 ,    491  ,   384.2915067
+            CALLED   ,  61.78832033 ,    315  ,   59.22279085
+            TABLES   ,  57.6841784  ,    383  ,   280.3507854
+            SEASON   ,  57.17549308 ,    328  ,   113.0598821
+            THOUGH   ,  57.02337411 ,    378  ,   277.344801
+            RABBIT   ,  53.99983679 ,    396  ,   562.042716
+            FRENCH   ,  53.16242234 ,    266  ,   53.79145392
+            EITHER   ,  52.10906556 ,    124  ,   2.97340864
+            PEPPER   ,  50.89069297 ,    324  ,   213.1306884
+            GERMAN   ,  50.59924482 ,    271  ,   76.93001325
+            TOMATO   ,  50.35589795 ,    274  ,   83.88261211
+            OTHERS   ,  49.44493158 ,    259  ,   68.27961037
+            AMERICA  ,  77.86494192 ,    366  ,   39.46537138
+            MESSAGE  ,  77.46112039 ,    415  ,   77.06379935
+            ANOTHER  ,  68.97730125 ,    262  ,   15.41755162
+            CHEDDAR  ,  66.86386169 ,    408  ,   163.3422075
+            SIMILAR  ,  66.56313748 ,    242  ,   12.9523218
+            PRESENT  ,  63.34258938 ,    141  ,   2.407539462
+            GENERAL  ,  51.60362468 ,    148  ,   5.475433715
+            SEVERAL  ,  47.80172375 ,    158  ,   9.027387856
+            THROUGH  ,  47.36941495 ,    267  ,   102.1875699
+            HUNDRED  ,  46.14407559 ,    77   ,   0.951672284
+            AMERICAN ,  72.75687285 ,    273  ,   14.67744161
+            INTEREST ,  66.28956352 ,    120  ,   1.248446889
+            TOGETHER ,  55.57654727 ,    232  ,   22.91301068
+            TEASPOON ,  48.98734099 ,    195  ,   18.70003118
+            ORIGINAL ,  47.02014271 ,    168  ,   12.10425305
+            MOUNTAIN ,  47.055396   ,    94   ,   1.711889159
+    
+        Illustration: subset of English words captured with top 50 O/E score by length
+            all_file_OlogE/part1_M3_result_top_bott_50OE_by_length.csv
+
+            UNIVERSI ,  52.91332268 ,    71  ,    0.40750281
+            WISCONSI ,  52.49765579 ,    92  ,    1.122212555
+            NGREDIEN ,  50.94387259 ,    54  ,    0.061826022
+            INGREDIE ,  48.19026727 ,    54  ,    0.128126416
+            INTERNET ,  47.39861855 ,    177 ,    14.39874556
+            EDCHEESE ,  47.26382794 ,    337 ,    458.5227489
+            NECESSAR ,  47.24404597 ,    58  ,    0.255668283
+            CALIFORN ,  47.21592223 ,    49  ,    0.038508461
+            ILLUSTRA ,  47.17422177 ,    189 ,    19.2150099
+            GREDIENT ,  47.14492295 ,    54  ,    0.156507114
+            XCELLENT ,  46.9510005  ,    55  ,    0.18700584
 
 Part 2
-I don't know to read genome sequence, so I cannot comment on the quality of the high score sequences.
-However, regarding to the problem that Obs is linear to word length while Exp is exponential to word length, this problem is loosen when analyzing e_coli sequence.
-I believe this is because the genome length is long comparing to the number of nucleobase.
+-   I don't know to read genome sequence, so I cannot comment on the quality of the high score sequences.
+-   However, regarding to the problem that Obs is linear to word length while Exp is exponential to word length, this problem is loosen when analyzing e_coli sequence.
+-   I believe this is because the genome length is long comparing to the number of nucleobase.
 
