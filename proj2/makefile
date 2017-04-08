@@ -14,6 +14,7 @@ word_occurrence:
 	./a.out -min $(len_min) -max $(len_max) -asclength ./books/hound_of_baskervilles_nows > ./word_occurrence/hound_of_baskervilles_nows
 	./a.out -min $(len_min) -max $(len_max) -asclength ./books/complete_book_of_cheese_nows > ./word_occurrence/complete_book_of_cheese_nows
 	./a.out -min $(len_min) -max $(len_max) -asclength ./books/wood_carving_nows > ./word_occurrence/wood_carving_nows
+	./a.out -min $(len_min) -max $(len_max) -asclength ./e_coli/sequence.fasta > ./word_occurrence/e_coli
 
 letter_occurrence:
 	if [ ! -d "./letter_occurrence" ]; then mkdir letter_occurrence; fi
@@ -26,6 +27,7 @@ letter_occurrence:
 	./a.out -min 1 -max 1 ./books/hound_of_baskervilles_nows > ./letter_occurrence/hound_of_baskervilles_nows
 	./a.out -min 1 -max 1 ./books/complete_book_of_cheese_nows > ./letter_occurrence/complete_book_of_cheese_nows
 	./a.out -min 1 -max 1 ./books/wood_carving_nows > ./letter_occurrence/wood_carving_nows
+	./a.out -min 1 -max 1 ./e_coli/sequence.fasta > ./letter_occurrence/e_coli
 
 a.out: counting_prime.c counting.c
 	-gcc counting.c
@@ -36,4 +38,4 @@ clean:
 	rm -f ./a.out
 	rm -rf word_occurrence
 	rm -rf letter_occurrence
-	rm -rf output
+#	rm -rf output
