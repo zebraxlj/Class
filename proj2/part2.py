@@ -1,60 +1,34 @@
 import csv
-import numpy as np
 import re
 from util import *
+from Markov import Markov
 
-# observation: number of books that contain W (word)
-# expectation: 
-
-# Define:
-#         l = len(seq_i)
-#         k = len(W)
-#         y_i ------------- # of occurrence of W in seq_i
-#         z_i ------------- if seq_i contains W
-#         Z = sum(z_i) ---- number of books that contain W
-# Then:
-#         p(z_i) = p(y_i >= 0) = 1 - p(y_i == 0) = 1 - (1 - p(W))^(l-k+1)
-#         E(Z) = E[sum(z_i)] = sum[E(z_i)] = sum[p(z_i)]
-#         p(W) = product(p(w_i))
+import sys
 
 P = dict()
+trans_matrix = []
+degree = 1
+row = dict()
+col = dict()
 # (word, O/E score, O, E) 
 word_tuples = []
 word_tuples_by_length = []
 total_char_count = 0
 total_word_count = 0
 
-books = ['alice_in_wonderland_nows', 'big_dummys_guide_to_internet_nows',\
-		'california_mexican_spanish_cook_book_nows', 'complete_book_of_cheese_nows',\
-		'einstein_relativity_nows', 'hamlet_prince_of_denmark_nows',\
-		'complete_book_of_cheese_nows', 'wood_carving_nows']
-		
-l = []
-for book in books:
-	with open('books/' + book) as file:
-		content = file.read()
-		l.append(len(content))
-print l
-
-# E = num_books * (1)
-def get_expected(word):
-	p_W = np.float64(1)
-	for letter in word:
-		p_W *= P[letter]
-
-	E_Z = 0
-	for i in xrange(len(books)):
-		p_z = 1 - (1 - p_W) ** (l[i] - len(word) + 1)
-		E_Z += p_z
-	
-	return E_Z
-
 def save_part2():
 	header = ['word', 'O/E', 'obs', 'E']
-	with open('output/part2_result_full.csv', 'wb') as csvfile:
-		writer = csv.writer(csvfile)
+	# with open('output/part2_letter_probability.csv', 'wb') as f:
+	#	writer = csv.writer(f)
+	#	writer.writerow(['letter', 'P'])
+	#	keys = P.keys()
+	#	keys = sorted(keys)
+	#	for key in keys:
+	#		writer.writerow([key, P[key]])
+	with open('output/part2_M'+str(order)+'_result_full.csv', 'wb') as f:
+		writer = csv.writer(f)
 		writer.writerows(word_tuples)
-	with open('output/part2_result_top_bott_50OE.csv', 'wb') as f:
+	with open('output/part2_M'+str(order)+'_result_top_bott_50OE.csv', 'wb') as f:
 		writer = csv.writer(f)
 		writer.writerow(['top 50'])
 		writer.writerow(header)
@@ -62,10 +36,11 @@ def save_part2():
 		writer.writerow(['bottom 50'])
 		writer.writerow(header)
 		writer.writerows(word_tuples[-51:-1])
-	with open('output/part2_result_top_bott_50OE_by_length.csv', 'wb') as f:
+	with open('output/part2_M'+str(order)+'_result_top_bott_50OE_by_length.csv', 'wb') as f:
 		writer = csv.writer(f)
 		for tuples in word_tuples_by_length:
 			if not tuples: continue
+                        temp = sorted(tuples, key = lambda score: score[1], reverse = True)
 			writer.writerow(['word length ' + str(len(tuples[0][0]))])
 			writer.writerow(['top 50 O/E'])
 			writer.writerow(header)
@@ -74,7 +49,7 @@ def save_part2():
 			writer.writerow(header)
 			writer.writerows(tuples[-51:-1])
 			writer.writerow([])
-	with open('output/part2_result_top_bott_50O_by_length.csv', 'wb') as f:
+	with open('output/part2_M'+str(order)+'_result_top_bott_50O_by_length.csv', 'wb') as f:
 		writer = csv.writer(f)
 		for tuples in word_tuples_by_length:
 			if not tuples: continue
@@ -82,38 +57,101 @@ def save_part2():
 			writer.writerow(['word length ' + str(len(temp[0][0]))])
 			writer.writerow(['top 50 Observation'])
 			writer.writerow(header)
-			writer.writerows(temp[1:51])
+			writer.writerows(temp[:51])
 			writer.writerow(['bottom 50 Observation'])
 			writer.writerow(header)
-			writer.writerows(temp[-51:-1])
+			writer.writerows(temp[-51:])
 			writer.writerow([])
 
+order = 4
 
+word_len_min = order+1
+word_len_max = 8
+
+books = ['alice_in_wonderland_nows', 'big_dummys_guide_to_internet_nows', 'california_mexican_spanish_cook_book_nows', 'complete_book_of_cheese_nows', 'einstein_relativity_nows', 'hamlet_prince_of_denmark_nows', 'complete_book_of_cheese_nows', 'wood_carving_nows']
+
+import math
 
 if __name__ == '__main__':
-	total_char_count, P = load_probability_table('letter_occurrence/all')
-	#test_probability_table(P)
+        sequence_name = 'e_coli'
+	file_pathes = []
+        file_pathes.append('letter_occurrence/'+sequence_name)
+	total_char_count = get_total_char_count(file_pathes)
+	print total_char_count
 
-	with open('word_occurrence/all', 'r') as file:
-		_ = file.readline()
-		for line in file:
-			tokens = re.split('[\t| ]+', line)
-			O = int(tokens[2])
-			E = get_expected(tokens[0])
-			if E == 0:
-				word_tuples.append((tokens[0], float('inf'), O, E))
-			else:
-				word_tuples.append((tokens[0], O/E, O, E))
+	file_pathes = []
+	file_pathes.append('word_occurrence/'+sequence_name)
+	occurrence = load_occurrence_file(file_pathes)
 
-	for i in xrange(11):
-		word_tuples_by_length.append([])
-	for elem in word_tuples:
-		word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
+	word_dict = dict()
+	
+	for order in xrange(1, 4):
+		print 'order',order
 
-	for i in xrange(len(word_tuples_by_length)):
-		word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
-										key = lambda word : word[1], reverse = True)
+		word_len_min = 6
+		word_len_max = 10
+		markov_model = Markov(occurrence, total_char_count, order, word_len_min, word_len_max)
 
-	word_tuples = sorted(word_tuples, key = lambda word : word[1], reverse = True)
+                word_tuples = []
+                word_tuples_by_length = []
+                for word in occurrence:
+			if len(word) < word_len_min or \
+			   len(word) > word_len_max:
+				continue
+			O = occurrence[word]
+			E = markov_model.get_expected_value(word)
+                        word_tuples.append((word, float(O)/E, int(O), E))
+#                        word_tuples.append((word, float(O)/(math.log(float(E)+1)+1), int(O), E))
+#                        word_tuples.append((word, float(math.pow(O,2))/(math.sqrt(float(E)/2+2)-1), int(O), E))
 
-	save_part2()
+
+		
+		for i in xrange(word_len_max+1):
+			word_tuples_by_length.append([])
+		for elem in word_tuples:
+			#word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
+                        word_tuples_by_length[len(elem[0])].append(elem)
+		for i in xrange(len(word_tuples_by_length)):
+			word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
+							  key = lambda word : word[1], reverse = True)
+
+		word_tuples = sorted(word_tuples, key = lambda word:word[1], reverse = True)
+		save_part2()
+		
+				
+	sys.exit(0)
+	
+	''' put everything in one place '''
+	file_name = 'all'
+	#file_name = 'complete_book_of_cheese_nows'
+	occurrence = load_occurrence_file('word_occurrence/'+file_name)
+	total_char_count = get_total_char_count('letter_occurrence/'+file_name)
+
+	# for key in occurrence.keys():
+	#	print key, '\t\t', occurrence[key]
+	for order in xrange(1,6):
+		print order
+		word_len_min = order + 1
+		
+		M1 = Markov(occurrence, total_char_count, order, word_len_min, word_len_max)
+
+		with open('word_occurrence/'+file_name, 'r') as file:
+			_ = file.readline()
+			for line in file:
+				tokens = re.split('[\t| ]+', line)
+				if len(tokens[0]) < word_len_min: continue
+				if len(tokens[0]) > word_len_max: continue
+				O = tokens[1]
+				E = M1.get_expected_value(tokens[0])
+				word_tuples.append((tokens[0], float(O)/E, int(O), E))
+
+		for i in xrange(word_len_max+1):
+			word_tuples_by_length.append([])
+		for elem in word_tuples:
+			word_tuples_by_length[len(elem[0]) - len(word_tuples[0][0]) + 1].append(elem)
+		for i in xrange(len(word_tuples_by_length)):
+			word_tuples_by_length[i] = sorted(word_tuples_by_length[i], \
+							  key = lambda word : word[1], reverse = True)
+		word_tuples = sorted(word_tuples, key = lambda word:word[1], reverse = True)
+		save_part2()
+		
